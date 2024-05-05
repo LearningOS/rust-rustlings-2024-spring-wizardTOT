@@ -2,8 +2,9 @@
 	single linked list merge
 	This problem requires you to merge two ordered singly linked lists into one ordered singly linked list
 */
-// I AM NOT DONE
 
+
+//use core::str::next_code_point;
 use std::fmt::{self, Display, Formatter};
 use std::ptr::NonNull;
 use std::vec::*;
@@ -43,7 +44,8 @@ impl<T> LinkedList<T> {
             end: None,
         }
     }
-
+}
+impl<T: PartialOrd + Clone + std::cmp::PartialOrd> LinkedList<T>{
     pub fn add(&mut self, obj: T) {
         let mut node = Box::new(Node::new(obj));
         node.next = None;
@@ -71,12 +73,40 @@ impl<T> LinkedList<T> {
     }
 	pub fn merge(list_a:LinkedList<T>,list_b:LinkedList<T>) -> Self
 	{
-		//TODO
-		Self {
-            length: 0,
-            start: None,
-            end: None,
-        }
+		let mut merge_list = LinkedList::new();
+		let mut ap = list_a.start;
+		let mut bp = list_b.start;
+		while ap.is_some() || bp.is_some() {
+			let aval = ap.map(|p| unsafe {
+				&(*p.as_ptr()).val
+			});
+			let bval = bp.map(|p| unsafe {
+				&(*p.as_ptr()).val
+			});
+			match (aval, bval) {
+				(None, None) => break,
+				(None, Some(bval)) => {
+					merge_list.add(bval.clone());
+					bp = unsafe { (*bp.unwrap().as_ptr()).next };
+				}
+				(Some(aval), None) => {
+					merge_list.add(aval.clone());
+					ap = unsafe { (*ap.unwrap().as_ptr()).next };
+				}
+				(Some(aval), Some(bval)) => {
+					if aval< bval {
+					merge_list.add(aval.clone());
+					ap = unsafe { (*ap.unwrap().as_ptr()).next };
+					}else {
+					merge_list.add(bval.clone());
+					bp = unsafe { (*bp.unwrap().as_ptr()).next };
+					}
+				}
+			}
+			
+		}
+		merge_list
+
 	}
 }
 

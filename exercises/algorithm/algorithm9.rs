@@ -2,7 +2,7 @@
 	heap
 	This question requires you to implement a binary heap function
 */
-// I AM NOT DONE
+
 
 use std::cmp::Ord;
 use std::default::Default;
@@ -38,6 +38,18 @@ where
 
     pub fn add(&mut self, value: T) {
         //TODO
+		self.items.push(value);
+		self.count +=1;
+		let mut idx = self.count;
+        while idx > 1 {
+            let parent_idx = self.parent_idx(idx);
+            if (self.comparator)(&self.items[idx], &self.items[parent_idx]) {
+                self.items.swap(idx, parent_idx);
+                idx = parent_idx;
+            } else {
+                break;
+            }
+        }
     }
 
     fn parent_idx(&self, idx: usize) -> usize {
@@ -57,8 +69,13 @@ where
     }
 
     fn smallest_child_idx(&self, idx: usize) -> usize {
-        //TODO
-		0
+        let left_idx = self.left_child_idx(idx);
+    let right_idx = self.right_child_idx(idx);
+    if right_idx <= self.count && (self.comparator)(&self.items[right_idx], &self.items[left_idx]) {
+        right_idx
+    } else {
+        left_idx
+    }
     }
 }
 
@@ -79,14 +96,35 @@ where
 
 impl<T> Iterator for Heap<T>
 where
-    T: Default,
+    T: Default+Clone,
 {
     type Item = T;
 
     fn next(&mut self) -> Option<T> {
         //TODO
-		None
+		if self.count == 0 {
+            return None; // Return None if the heap is empty
+        }
+    
+        let root = self.items[1].clone(); // Save the root value
+        self.items.swap(1, self.count); // Swap root with last element
+        self.items.pop(); // Remove the last element (previously the root)
+        self.count -= 1; // Decrease count
+    
+        let mut idx = 1;
+        while self.children_present(idx) {
+            let smallest_child = self.smallest_child_idx(idx);
+            if (self.comparator)(&self.items[smallest_child], &self.items[idx]) {
+                self.items.swap(smallest_child, idx);
+                idx = smallest_child;
+            } else {
+                break;
+            }
+        }
+    
+        Some(root)
     }
+		
 }
 
 pub struct MinHeap;
